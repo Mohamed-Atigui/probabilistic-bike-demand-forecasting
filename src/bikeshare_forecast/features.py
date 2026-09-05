@@ -27,7 +27,13 @@ FEATURE_COLUMNS = [
 
 
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Create time and lag features using only information available at prediction time."""
+    """Create leakage-safe features aligned on exact timestamps.
+
+    The UCI series is not a perfectly regular hourly grid.  Positional shifts
+    would therefore confuse "24 previous rows" with "exactly 24 hours ago".
+    Target lags are joined by timestamp, while the rolling statistic uses the
+    half-open interval [t - 24h, t), so the current target is never included.
+    """
     validate_schema(df)
     out = df.copy()
     ts = out["timestamp"]
@@ -43,9 +49,12 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     out["dow_cos"] = np.cos(2 * np.pi * dow / 7)
     out["year_sin"] = np.sin(2 * np.pi * doy / 365.25)
     out["year_cos"] = np.cos(2 * np.pi * doy / 365.25)
-    out["demand_lag_24"] = out["demand"].shift(24)
-    out["demand_lag_168"] = out["demand"].shift(168)
-    out["demand_rolling_24"] = out["demand"].shift(1).rolling(24).mean()
+    demand_by_time = out.set_index("timestamp")["demand"]
+    out["demand_lag_24"] = (ts - pd.Timedelta(hours=24)).map(demand_by_time)
+    out["demand_lag_168"] = (ts - pd.Timedelta(hours=168)).map(demand_by_time)
+    out["demand_rolling_24"] = (
+        demand_by_time.rolling("24h", closed="left", min_periods=1).mean().to_numpy()
+    )
     return out.dropna().reset_index(drop=True)
 
 

@@ -99,5 +99,7 @@ def validate_schema(df: pd.DataFrame) -> None:
         raise TypeError("timestamp must be datetime64")
     if not df["timestamp"].is_monotonic_increasing:
         raise ValueError("timestamps must be sorted")
+    if df["timestamp"].duplicated().any():
+        raise ValueError("timestamps must be unique")
     if (df["demand"] < 0).any():
         raise ValueError("demand must be non-negative")
