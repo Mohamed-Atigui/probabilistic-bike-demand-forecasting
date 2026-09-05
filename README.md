@@ -22,13 +22,13 @@ The checked-in artifacts were produced from the real UCI hourly dataset. The fin
 | Poisson histogram gradient boosting | **73.98** | **110.34** | **0.445** |
 
 Compared with the weekly baseline, the model reduces MAE by 6.0%, RMSE by 20.5% and RMSLE by 44.9%. The nominal 90% conformal interval reaches 85.4% coverage on the shifted test period. This under-coverage is retained and discussed as a limitation rather than hidden.
-
+![Bike-demand forecasts with 90% prediction intervals](artifacts/forecast.png)
 ## Quick start
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+pip install -e ".[app]"
 python -m bikeshare_forecast.train --output-dir artifacts --data-path data/uci/hour.csv
 ```
 
@@ -75,25 +75,6 @@ Dataset reference: Fanaee-T, H. and Gama, J. (2014), *Bike Sharing*, UCI Machine
     ├── test_features.py
     └── test_pipeline.py
 ```
-
-## Interview discussion points
-
-1. Why random cross-validation leaks information in time-series problems.
-2. Why a weekly seasonal baseline can be hard to beat.
-3. Why a Poisson objective is natural for demand counts.
-4. How conformal calibration turns residuals into empirically valid intervals under exchangeability assumptions.
-5. What changes under distribution shift: strikes, new stations, pricing changes or extreme weather.
-6. How to monitor MAE, interval coverage, feature drift and residual drift in production.
-
-## Honest CV wording
-
-Use this only after running the experiments and being able to explain the code:
-
-> **Probabilistic forecasting of hourly bike demand - Python, scikit-learn**  
-> Built a leakage-safe time-series ML pipeline with seasonal baselines and gradient boosting; calibrated 90% conformal prediction intervals and evaluated accuracy, uncertainty coverage and feature importance on a chronological holdout.
-
-After you have run and understood the project, you can add: “Reduced holdout RMSE by 20.5% versus a weekly seasonal baseline on 17k+ real hourly observations.”
-
 ## Sources
 
 - UCI Bike Sharing dataset: https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset
