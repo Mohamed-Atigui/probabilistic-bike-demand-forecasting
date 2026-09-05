@@ -1,25 +1,25 @@
 {
   "split": {
     "data_source": "UCI Bike Sharing - Capital Bikeshare hourly data",
-    "train_rows": 11187,
-    "calibration_rows": 2581,
-    "test_rows": 3443,
-    "test_start": "2012-08-08 21:00:00",
+    "train_rows": 11017,
+    "calibration_rows": 2543,
+    "test_rows": 3390,
+    "test_start": "2012-08-08 07:00:00",
     "test_end": "2012-12-31 23:00:00"
   },
   "model": {
-    "mae": 73.97821715629117,
-    "rmse": 110.34437447741345,
-    "rmsle": 0.4450410902640574
+    "mae": 48.64766741022723,
+    "rmse": 79.98231302696695,
+    "rmsle": 0.36432366367064367
   },
   "seasonal_naive": {
-    "mae": 78.66279407493465,
-    "rmse": 138.8124626850519,
-    "rmsle": 0.8082473876877384
+    "mae": 63.94631268436578,
+    "rmse": 109.61869013602855,
+    "rmsle": 0.5857079294202348
   },
   "prediction_interval_90": {
-    "coverage": 0.8539064769096718,
-    "mean_interval_width": 270.1408161624363,
-    "conformal_radius": 159.89007625205437
+    "coverage": 0.8979351032448377,
+    "mean_interval_width": 229.94928532892462,
+    "conformal_radius": 130.3092329434162
   }
 }
