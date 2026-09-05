@@ -14,7 +14,7 @@ Educational forecasting prototype for hourly bike-rental demand. It demonstrates
 
 ## Validation design
 
-Observations are ordered by time and divided into 65% training, 15% conformal calibration and 20% testing. No random shuffle is used. Lagged demand features use only observations available at least 24 hours before the forecast time.
+Observations are ordered by time and divided into 65% training, 15% conformal calibration and 20% testing. No random shuffle is used. Demand lags are matched by exact timestamp (`t-24h` and `t-168h`) rather than by row position, because the source series contains missing hours. The rolling feature uses only observations in `[t-24h, t)`.
 
 ## Model
 
@@ -24,16 +24,16 @@ Histogram gradient boosting with Poisson loss. Predictions are clipped at zero. 
 
 | Metric | ML model | Weekly seasonal baseline |
 | --- | ---: | ---: |
-| MAE | 73.98 | 78.66 |
-| RMSE | 110.34 | 138.81 |
-| RMSLE | 0.445 | 0.808 |
+| MAE | 48.65 | 63.95 |
+| RMSE | 79.98 | 109.62 |
+| RMSLE | 0.364 | 0.586 |
 
-The nominal 90% interval has 85.4% empirical test coverage and a mean width of 270.14 rentals.
+The nominal 90% interval has 89.8% empirical test coverage and a mean width of 229.95 rentals.
 
 ## Limitations
 
 - Weather observations are treated as known; a live system would use weather forecasts and inherit their uncertainty.
-- The symmetric interval has imperfect coverage under temporal distribution shift.
+- The symmetric interval is marginal rather than conditional: coverage may vary by hour, season or demand level.
 - Demand from 2011-2012 is not representative of current mobility patterns.
 - Aggregate demand does not solve station-level rebalancing.
 - Hyperparameters are fixed; a nested time-series validation study would be needed before deployment.

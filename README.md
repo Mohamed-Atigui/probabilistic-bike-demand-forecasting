@@ -5,7 +5,8 @@ An end-to-end machine-learning project for hourly bike-demand forecasting. The p
 ## Why this project is credible
 
 - The split is chronological: train, calibration, then test.
-- Every target-derived feature is lagged, so no future demand enters training features.
+- Target lags are matched to exact timestamps (`t-24h` and `t-168h`), so missing hours cannot silently misalign the history.
+- The 24-hour rolling feature uses the half-open window `[t-24h, t)`, excluding the current target.
 - A seasonal-naive baseline is evaluated alongside the ML model.
 - The point model uses a Poisson loss suited to non-negative count data.
 - Prediction intervals are calibrated on a held-out time window using split conformal prediction.
@@ -18,11 +19,13 @@ The checked-in artifacts were produced from the real UCI hourly dataset. The fin
 
 | Model | MAE | RMSE | RMSLE |
 | --- | ---: | ---: | ---: |
-| Seasonal naive (`t-168h`) | 78.66 | 138.81 | 0.808 |
-| Poisson histogram gradient boosting | **73.98** | **110.34** | **0.445** |
+| Seasonal naive (`t-168h`) | 63.95 | 109.62 | 0.586 |
+| Poisson histogram gradient boosting | **48.65** | **79.98** | **0.364** |
 
-Compared with the weekly baseline, the model reduces MAE by 6.0%, RMSE by 20.5% and RMSLE by 44.9%. The nominal 90% conformal interval reaches 85.4% coverage on the shifted test period. This under-coverage is retained and discussed as a limitation rather than hidden.
+Compared with the weekly baseline, the model reduces MAE by 23.9%, RMSE by 27.0% and RMSLE by 37.8%. The nominal 90% conformal interval reaches 89.8% coverage on the shifted test period, with a mean width of 229.95 rentals.
+
 ![Bike-demand forecasts with 90% prediction intervals](artifacts/forecast.png)
+
 ## Quick start
 
 ```bash
@@ -54,7 +57,7 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 
 ## Real-data extension
 
-The included dataset is loaded through the schema adapter in `data.py`. The normalized UCI weather variables are converted back to their documented physical scales. Time-series observations are never randomly shuffled.
+The included dataset is loaded through the schema adapter in `data.py`. The normalized UCI weather variables are converted back to their documented physical scales. Time-series observations are never randomly shuffled. The raw UCI series contains missing hours, so lag features are joined by timestamp rather than computed with positional row shifts. Rows without the required exact history are excluded before splitting.
 
 Dataset reference: Fanaee-T, H. and Gama, J. (2014), *Bike Sharing*, UCI Machine Learning Repository.
 
@@ -75,6 +78,9 @@ Dataset reference: Fanaee-T, H. and Gama, J. (2014), *Bike Sharing*, UCI Machine
     ├── test_features.py
     └── test_pipeline.py
 ```
+
+The test suite checks chronological splitting, end-to-end artifact generation, leakage-safe rolling windows, and exact lag alignment on an intentionally irregular time series.
+
 ## Sources
 
 - UCI Bike Sharing dataset: https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset
